@@ -5,135 +5,301 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Evaluación - Prof. Diego Rodriguez | EETP 485</title>
     <style>
-        :root { --color-primario: #1a5276; --color-secundario: #2980b9; --color-fondo: #f0f4f8; --color-tarjeta: #ffffff; --color-texto: #2c3e50; }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--color-fondo); color: var(--color-texto); line-height: 1.6; min-height: 100vh; display: flex; flex-direction: column; }
+        :root {
+            --primary: #1a5276;
+            --secondary: #2980b9;
+            --accent: #e74c3c;
+            --success: #27ae60;
+            --bg: #f0f4f8;
+            --card: #ffffff;
+            --text: #2c3e50;
+        }
 
-        /* Header Examen */
-        .exam-header {
-            background: linear-gradient(135deg, var(--color-primario), var(--color-secundario));
-            color: white; padding: 1.5rem; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
-        .exam-header h1 { font-size: 1.5rem; font-weight: 700; }
-        .exam-header p { font-size: 0.9rem; opacity: 0.9; margin-top: 0.3rem; }
-        
-        /* Contenedor Principal */
-        .exam-container { max-width: 800px; margin: 2rem auto; padding: 0 1.5rem; flex: 1; }
-        
-        /* Estilos del Quiz */
-        .quiz-box { background: var(--color-tarjeta); border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); padding: 2rem; display: none; }
-        .quiz-box.active { display: block; }
-        
-        .welcome-screen { text-align: center; padding: 3rem 2rem; background: var(--color-tarjeta); border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
-        .btn-start { 
-            background: linear-gradient(135deg, #0077ff, #00bbff); color: white; border: none; padding: 1rem 3rem; 
-            font-size: 1.2rem; font-weight: 700; border-radius: 8px; cursor: pointer; margin-top: 2rem; 
-            box-shadow: 0 4px 15px rgba(0, 119, 255, 0.3); transition: transform 0.2s;
+
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
-        .btn-start:hover { transform: translateY(-3px); }
+
+        header h1 { font-size: 1.5rem; margin-bottom: 0.5rem; }
+        header p { font-size: 0.9rem; opacity: 0.9; }
+
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+            flex: 1;
+        }
+
+        /* Pantallas */
+        .screen { display: none; animation: fadeIn 0.4s ease; }
+        .screen.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Tarjetas */
+        .card {
+            background: var(--card);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+
+        /* Botones */
+        .btn {
+            background: linear-gradient(135deg, var(--secondary), #4facfe);
+            color: white;
+            border: none;
+            padding: 1rem 2.5rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 1.5rem;
+        }
+
+        .btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(41, 128, 185, 0.3); }
+        .btn:disabled { background: #bdc3c7; cursor: not-allowed; opacity: 0.6; }
+        .btn-secondary { background: #6c757d; }
+        .btn-secondary:hover { background: #5a6268; }
 
         /* Preguntas */
-        .question-card { margin-bottom: 2rem; padding: 1.5rem; background: #f8f9fa; border-radius: 8px; border-left: 4px solid var(--color-secundario); }
-        .question-card h4 { margin-bottom: 1rem; color: #2c3e50; font-size: 1.1rem; }
-        .option-label { display: block; padding: 0.8rem; margin: 0.5rem 0; background: white; border-radius: 6px; cursor: pointer; transition: background 0.2s; border: 1px solid #e0e0e0; }
-        .option-label:hover { background: #e3f2fd; border-color: var(--color-secundario); }
-        .option-label input { margin-right: 0.8rem; }
-
-        .progress-bar-container { width: 100%; height: 8px; background: #e0e0e0; border-radius: 4px; margin-bottom: 2rem; overflow: hidden; }
-        .progress-fill { height: 100%; background: var(--color-secundario); transition: width 0.3s; }
-
-        .btn-submit { 
-            width: 100%; padding: 1rem; background: #27ae60; color: white; border: none; 
-            font-size: 1.1rem; font-weight: 700; border-radius: 8px; cursor: pointer; margin-top: 1rem; 
+        .question-card {
+            background: var(--bg);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            border-left: 5px solid var(--secondary);
+            text-align: left;
         }
-        
+
+        .question-card h4 { margin-bottom: 1rem; color: var(--primary); font-size: 1.1rem; }
+
+        .option {
+            display: block;
+            padding: 0.8rem;
+            margin: 0.5rem 0;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 1px solid #ddd;
+            transition: background 0.2s;
+        }
+
+        .option:hover { background: #e3f2fd; border-color: var(--secondary); }
+        .option input { margin-right: 0.8rem; }
+
+        /* Progreso */
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #ddd;
+            border-radius: 4px;
+            margin: 1rem 0 2rem;
+            overflow: hidden;
+        }
+        .progress-fill { height: 100%; background: var(--secondary); width: 0%; transition: width 0.3s; }
+
         /* Resultados */
-        .result-box { text-align: center; background: var(--color-tarjeta); padding: 2rem; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
-        .score-display { font-size: 4rem; font-weight: 800; color: var(--color-secundario); margin: 1rem 0; }
-        .score-badge { display: inline-block; padding: 0.5rem 1.5rem; border-radius: 50px; color: white; font-weight: 600; font-size: 1.1rem; margin-bottom: 2rem; }
-        
-        .review-item { text-align: left; background: #f8f9fa; padding: 1rem; margin-bottom: 1rem; border-radius: 8px; border-left: 5px solid #ccc; }
-        .review-item.correct { border-left-color: #27ae60; }
-        .review-item.incorrect { border-left-color: #e74c3c; }
-        
-        .hidden { display: none; }
-        .footer-exam { text-align: center; padding: 1rem; font-size: 0.8rem; color: #7f8c8d; margin-top: auto; }
+        .score-display { font-size: 4rem; font-weight: 800; color: var(--secondary); margin: 1rem 0; }
+        .badge {
+            display: inline-block;
+            padding: 0.5rem 1.5rem;
+            border-radius: 50px;
+            color: white;
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Revisión */
+        .review-item {
+            background: white;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            border-left: 5px solid #ccc;
+            text-align: left;
+        }
+        .review-item.correct { border-left-color: var(--success); }
+        .review-item.incorrect { border-left-color: var(--accent); }
+
+        footer {
+            text-align: center;
+            padding: 1.5rem;
+            color: #7f8c8d;
+            font-size: 0.85rem;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        /* Estados de carga */
+        .loading { color: var(--secondary); font-weight: 600; margin: 1rem 0; }
+        .error { color: var(--accent); font-weight: 600; margin: 1rem 0; }
+
+        /* Oculto */
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-    <header class="exam-header">
+    <header>
         <h1>⚡ Evaluación de Conocimientos</h1>
         <p>Taller Mediciones Eléctricas — EETP 485 — Prof. Diego Rodriguez</p>
     </header>
 
-    <main class="exam-container">
+    <main class="container">
         
-        <!-- Pantalla de Bienvenida -->
-        <div id="welcomeScreen" class="welcome-screen active">
-            <h2> Cuestionario de Autoevaluación</h2>
-            <p style="margin-top: 1rem; color: #666;">Se seleccionarán <strong>20 preguntas aleatorias</strong> sobre Osciloscopios, RLC, Motores y Seguridad.</p>
-            <p style="color: #666;">No se guardan datos personales. Es anónimo.</p>
-            <button onclick="startQuiz()" class="btn-start">Comenzar Evaluación</button>
+        <!-- PANTALLA DE INICIO -->
+        <div id="welcomeScreen" class="screen active">
+            <div class="card">
+                <h2>📝 Cuestionario de Autoevaluación</h2>
+                <p style="margin: 1.5rem 0; color: #666; line-height: 1.6;">
+                    Se seleccionarán <strong>20 preguntas aleatorias</strong> de un banco de más de 100 preguntas.
+                    <br>La evaluación es anónima y no guarda resultados.
+                </p>
+                <div id="loadingMsg" class="loading">🔄 Cargando banco de preguntas...</div>
+                <button id="startBtn" class="btn" disabled onclick="startQuiz()">Cargando preguntas...</button>
+            </div>
         </div>
 
-        <!-- Pantalla de Examen -->
-        <div id="quizScreen" class="quiz-box">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-weight: 600;">
+        <!-- PANTALLA DE QUIZ -->
+        <div id="quizScreen" class="screen">
+            <div class="progress-info" style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-weight: 600; color: #7f8c8d;">
                 <span id="progressText">Pregunta 1 de 20</span>
-                <span id="timer">⏱️</span>
             </div>
-            <div class="progress-bar-container">
-                <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
             </div>
-            <div id="questionsContainer"></div>
-            <button onclick="submitQuiz()" class="btn-submit">Finalizar y Ver Nota</button>
+            
+            <div id="questionsContainer">
+                <!-- Las preguntas se generan aquí -->
+            </div>
+
+            <button class="btn" onclick="submitQuiz()">Finalizar y Ver Nota</button>
         </div>
 
-        <!-- Pantalla de Resultados -->
-        <div id="resultScreen" class="result-box hidden">
-            <h3>📊 Tu Resultado</h3>
-            <div class="score-display" id="scoreValue">0.0</div>
-            <div id="scoreBadge" class="score-badge"></div>
-            
-            <div style="margin: 2rem 0;">
-                <button onclick="toggleReview()" class="btn-start" style="background: #6c757d; padding: 0.8rem 2rem; font-size: 1rem;">🔍 Revisar Respuestas</button>
+        <!-- PANTALLA DE RESULTADOS -->
+        <div id="resultScreen" class="screen">
+            <div class="card">
+                <h3>📊 Resultados Finales</h3>
+                <div class="score-display" id="scoreValue">0.0</div>
+                <div id="scoreBadge" class="badge"></div>
+                
+                <p id="scoreMsg" style="margin-bottom: 2rem; font-size: 1.1rem;"></p>
+
+                <button class="btn btn-secondary" onclick="toggleReview()">🔍 Revisar Respuestas</button>
+                
+                <div id="reviewContainer" class="hidden" style="margin-top: 2rem; text-align: left;"></div>
+                
+                <button class="btn" style="margin-top: 2rem;" onclick="location.reload()">🔄 Realizar Nuevo Test</button>
             </div>
-            
-            <div id="reviewContainer" class="hidden"></div>
-            
-            <button onclick="location.reload()" class="btn-start" style="background: var(--color-secundario); padding: 0.8rem 2rem; font-size: 1rem; margin-top: 1rem;"> Intentar de Nuevo</button>
         </div>
 
     </main>
 
-    <footer class="footer-exam">
+    <footer>
         © 2026 EETP 485 — Material didáctico de libre acceso
     </footer>
 
     <script>
+        // Variables globales INICIALIZADAS
         let questions = [];
         let selectedQuestions = [];
         let userAnswers = [];
-        const TOTAL = 20;
+        const TOTAL_QUESTIONS = 20;
+        let questionsLoaded = false;
+
+        // Carga inicial al cargar la página
+        window.addEventListener('DOMContentLoaded', async () => {
+            console.log('🔄 Iniciando carga de questions.json...');
+            await loadQuestions();
+        });
 
         async function loadQuestions() {
             try {
-                // Importante: busca el JSON en la misma carpeta
+                // Verificar que el archivo existe
                 const response = await fetch('questions.json');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: No se encontró questions.json`);
+                }
+                
                 const data = await response.json();
-                questions = data.questions;
+                console.log('📦 Datos recibidos:', data);
+                
+                // Soporta tanto array directo como { questions: [...] }
+                if (Array.isArray(data)) {
+                    questions = data;
+                } else if (data && Array.isArray(data.questions)) {
+                    questions = data.questions;
+                } else {
+                    throw new Error('Formato de JSON inválido');
+                }
+                
+                if (questions.length === 0) {
+                    throw new Error('El banco de preguntas está vacío');
+                }
+
+                console.log(`✅ ÉXITO: ${questions.length} preguntas cargadas correctamente.`);
+                questionsLoaded = true;
+                
+                // Actualizar UI
+                const loadingMsg = document.getElementById('loadingMsg');
+                const startBtn = document.getElementById('startBtn');
+                
+                loadingMsg.textContent = `✅ ${questions.length} preguntas listas`;
+                loadingMsg.className = 'loading'; // Remover clase error si existe
+                startBtn.textContent = 'Comenzar Evaluación';
+                startBtn.disabled = false;
+                
             } catch (error) {
-                alert('Error al cargar el banco de preguntas. Contacte al profesor.');
+                console.error('❌ ERROR CRÍTICO:', error);
+                const loadingMsg = document.getElementById('loadingMsg');
+                const startBtn = document.getElementById('startBtn');
+                
+                loadingMsg.textContent = `⚠️ Error: ${error.message}`;
+                loadingMsg.className = 'error';
+                startBtn.textContent = 'Error al cargar';
+                startBtn.disabled = true;
             }
         }
 
         function startQuiz() {
-            selectedQuestions = [...questions].sort(() => Math.random() - 0.5).slice(0, TOTAL);
-            userAnswers = new Array(TOTAL).fill(null);
+            console.log('🖱️ Botón clickeado');
+            console.log('questionsLoaded:', questionsLoaded);
+            console.log('questions.length:', questions.length);
             
+            // Verificación de seguridad
+            if (!questionsLoaded || questions.length === 0) {
+                alert('⚠️ Las preguntas no se cargaron correctamente. Recarga la página.');
+                return;
+            }
+
+            // Mezclar y seleccionar 20 preguntas
+            selectedQuestions = [...questions]
+                .sort(() => Math.random() - 0.5)
+                .slice(0, TOTAL_QUESTIONS);
+            
+            userAnswers = new Array(TOTAL_QUESTIONS).fill(null);
+            
+            console.log(`🚀 Iniciando evaluación con ${selectedQuestions.length} preguntas`);
+            
+            // Cambiar pantalla
             document.getElementById('welcomeScreen').classList.remove('active');
-            document.getElementById('welcomeScreen').style.display = 'none';
             document.getElementById('quizScreen').classList.add('active');
             
             renderQuestions();
@@ -142,83 +308,109 @@
         function renderQuestions() {
             const container = document.getElementById('questionsContainer');
             container.innerHTML = '';
-            selectedQuestions.forEach((q, i) => {
-                const div = document.createElement('div');
-                div.className = 'question-card';
-                div.innerHTML = `
-                    <h4>${i + 1}. ${q.question}</h4>
+            
+            selectedQuestions.forEach((q, index) => {
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.innerHTML = `
+                    <h4>${index + 1}. ${q.question}</h4>
                     <div class="options">
-                        ${q.options.map((opt, j) => `
-                            <label class="option-label">
-                                <input type="radio" name="q${i}" value="${j}" onchange="saveAnswer(${i}, ${j})">
+                        ${q.options.map((opt, i) => `
+                            <label class="option">
+                                <input type="radio" name="q${index}" value="${i}" onchange="saveAnswer(${index}, ${i})">
                                 ${opt}
                             </label>
                         `).join('')}
                     </div>
                 `;
-                container.appendChild(div);
+                container.appendChild(card);
             });
+            updateProgress();
         }
 
-        function saveAnswer(idx, val) {
-            userAnswers[idx] = val;
+        function saveAnswer(qIndex, optIndex) {
+            userAnswers[qIndex] = optIndex;
+            updateProgress();
+        }
+
+        function updateProgress() {
             const answered = userAnswers.filter(a => a !== null).length;
-            document.getElementById('progressText').textContent = `Respondidas: ${answered} de ${TOTAL}`;
-            document.getElementById('progressFill').style.width = `${(answered / TOTAL) * 100}%`;
+            const percent = (answered / TOTAL_QUESTIONS) * 100;
+            
+            document.getElementById('progressText').textContent = `Respondidas: ${answered} de ${TOTAL_QUESTIONS}`;
+            document.getElementById('progressFill').style.width = `${percent}%`;
         }
 
         function submitQuiz() {
             const unanswered = userAnswers.filter(a => a === null).length;
-            if (unanswered > 0) {
-                if (!confirm(`Te faltan ${unanswered} preguntas. ¿Deseas finalizar igual?`)) return;
+            if (unanswered > 0 && !confirm(`⚠️ Te faltan ${unanswered} preguntas sin responder. ¿Deseas finalizar de todas formas?`)) {
+                return;
             }
 
-            let correct = 0;
+            let correctCount = 0;
             selectedQuestions.forEach((q, i) => {
-                if (userAnswers[i] === q.correct) correct++;
+                if (userAnswers[i] === q.correct) correctCount++;
             });
 
-            const score = Math.round((correct / TOTAL) * 10 * 10) / 10;
+            const score = Math.round((correctCount / TOTAL_QUESTIONS) * 10 * 10) / 10;
             
+            // Mostrar resultados
             document.getElementById('quizScreen').classList.remove('active');
-            document.getElementById('resultScreen').classList.remove('hidden');
+            document.getElementById('resultScreen').classList.add('active');
             document.getElementById('scoreValue').textContent = score.toFixed(1);
-
+            
             const badge = document.getElementById('scoreBadge');
-            if (score >= 9) { badge.textContent = '🏆 Excelente'; badge.style.background = '#27ae60'; }
-            else if (score >= 7) { badge.textContent = '👍 Muy Bien'; badge.style.background = '#2980b9'; }
-            else if (score >= 5) { badge.textContent = '📚 Aprobado'; badge.style.background = '#f39c12'; }
-            else { badge.textContent = ' Necesita Repaso'; badge.style.background = '#e74c3c'; }
+            const msg = document.getElementById('scoreMsg');
+            
+            if (score >= 9) {
+                badge.textContent = '🏆 Excelente';
+                badge.style.background = '#27ae60';
+                msg.textContent = '¡Dominas perfectamente el contenido técnico!';
+            } else if (score >= 7) {
+                badge.textContent = '👍 Muy Bien';
+                badge.style.background = '#2980b9';
+                msg.textContent = 'Buen nivel de comprensión, sigue así.';
+            } else if (score >= 5) {
+                badge.textContent = '📚 Aprobado';
+                badge.style.background = '#f39c12';
+                msg.textContent = 'Aprobado, pero revisa los conceptos donde fallaste.';
+            } else {
+                badge.textContent = '💪 Necesita Refuerzo';
+                badge.style.background = '#e74c3c';
+                msg.textContent = 'Es recomendable repasar los manuales y volver a intentar.';
+            }
 
             renderReview();
         }
 
         function renderReview() {
             const container = document.getElementById('reviewContainer');
-            container.innerHTML = '';
+            container.innerHTML = '<h4 style="margin-bottom: 1rem; color: var(--primary);">Detalle de Respuestas</h4>';
+            
             selectedQuestions.forEach((q, i) => {
-                const isCorrect = userAnswers[i] === q.correct;
-                const userText = userAnswers[i] !== null ? q.options[userAnswers[i]] : 'Sin responder';
-                const correctText = q.options[q.correct];
+                const userAns = userAnswers[i];
+                const isCorrect = userAns === q.correct;
+                const userText = userAns !== null ? q.options[userAns] : 'Sin responder';
                 
-                const div = document.createElement('div');
-                div.className = `review-item ${isCorrect ? 'correct' : 'incorrect'}`;
-                div.innerHTML = `
-                    <strong>${i + 1}. ${q.question}</strong><br>
-                    <span style="color:${isCorrect ? 'green' : 'red'}">Tu respuesta: ${userText} ${isCorrect ? '✅' : '❌'}</span><br>
-                    ${!isCorrect ? `<span style="color:green">Correcta: ${correctText}</span>` : ''}
+                const item = document.createElement('div');
+                item.className = `review-item ${isCorrect ? 'correct' : 'incorrect'}`;
+                item.innerHTML = `
+                    <strong>${i + 1}. ${q.question}</strong>
+                    <div style="margin-top: 0.5rem; font-size: 0.9rem;">
+                        <p style="color: ${isCorrect ? 'green' : 'red'}">
+                            Tu respuesta: <strong>${userText}</strong> ${isCorrect ? '✅' : '❌'}
+                        </p>
+                        ${!isCorrect ? `<p style="color: green">Correcta: <strong>${q.options[q.correct]}</strong></p>` : ''}
+                    </div>
                 `;
-                container.appendChild(div);
+                container.appendChild(item);
             });
         }
 
         function toggleReview() {
-            const el = document.getElementById('reviewContainer');
-            el.classList.toggle('hidden');
+            const container = document.getElementById('reviewContainer');
+            container.classList.toggle('hidden');
         }
-
-        // Cargar al inicio
-        loadQuestions();
     </script>
 </body>
 </html>
