@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evaluación - Prof. Diego Rodriguez</title>
+    <!-- Librerías para generar .docx y descargar -->
+    <script src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
+    <script src="https://unpkg.com/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+    <style>
+        :root { --primary: #1a5276; --secondary: #2980b9; --accent: #e74c3c; --success: #27ae60; --bg: #f0f4f8; --card: #ffffff; --text: #2c3e50; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+        body { background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
+        header { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; padding: 1.5rem; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        header h1 { font-size: 1.5rem; margin-bottom: 0.5rem; } header p { font-size: 0.9rem; opacity: 0.9; }
+        .container { max-width: 800px; margin: 2rem auto; padding: 0 1.5rem; flex: 1; }
+        .screen { display: none; animation: fadeIn 0.4s ease; } .screen.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .card { background: var(--card); padding: 2rem; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); text-align: center; }
+        .btn { background: linear-gradient(135deg, var(--secondary), #4facfe); color: white; border: none; padding: 1rem 2.5rem; font-size: 1.1rem; font-weight: 700; border-radius: 8px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; margin-top: 1.5rem; }
+        .btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(41, 128, 185, 0.3); }
+        .btn:disabled { background: #bdc3c7; cursor: not-allowed; opacity: 0.6; }
+        .btn-secondary { background: #6c757d; } .btn-secondary:hover { background: #5a6268; }
+        .question-card { background: var(--bg); padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem; border-left: 5px solid var(--secondary); text-align: left; }
+        .question-card h4 { margin-bottom: 1rem; color: var(--primary); font-size: 1.1rem; }
+        .option { display: block; padding: 0.8rem; margin: 0.5rem 0; background: white; border-radius: 6px; cursor: pointer; border: 1px solid #ddd; transition: background 0.2s; }
+        .option:hover { background: #e3f2fd; border-color: var(--secondary); } .option input { margin-right: 0.8rem; }
+        .progress-bar { width: 100%; height: 8px; background: #ddd; border-radius: 4px; margin: 1rem 0 2rem; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--secondary); width: 0%; transition: width 0.3s; }
+        .score-display { font-size: 4rem; font-weight: 800; color: var(--secondary); margin: 1rem 0; }
+        .badge { display: inline-block; padding: 0.5rem 1.5rem; border-radius: 50px; color: white; font-weight: 700; font-size: 1.2rem; margin-bottom: 2rem; }
+        .review-item { background: white; padding: 1rem; margin-bottom: 1rem; border-radius: 8px; border-left: 5px solid #ccc; text-align: left; }
+        .review-item.correct { border-left-color: var(--success); } .review-item.incorrect { border-left-color: var(--accent); }
+        footer { text-align: center; padding: 1.5rem; color: #7f8c8d; font-size: 0.85rem; border-top: 1px solid #e0e0e0; }
+        .loading { color: var(--secondary); font-weight: 600; margin: 1rem 0; } .error { color: var(--accent); font-weight: 600; margin: 1rem 0; }
+        .hidden { display: none !important; }
+        
+        /* Formulario */
+        .form-group { margin-bottom: 1rem; text-align: left; }
+        .form-group label { display: block; font-weight: 600; margin-bottom: 0.4rem; color: var(--primary); }
+        .form-group input { width: 100%; padding: 0.8rem; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; transition: border 0.3s; }
+        .form-group input:focus { border-color: var(--secondary); outline: none; box-shadow: 0 0 0 3px rgba(41, 128, 185, 0.1); }
+        .form-error { color: var(--accent); font-size: 0.9rem; margin-top: 0.5rem; display: none; }
+
+        /* Temporizador Flotante */
+        #timer {
+            position: fixed; top: 20px; right: 20px; z-index: 1000;
+            font-size: 1.4rem; font-weight: 800; font-family: monospace;
+            color: var(--secondary); background: rgba(255,255,255,0.95);
+            padding: 0.6rem 1.2rem; border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            backdrop-filter: blur(5px); transition: all 0.3s ease;
+            display: none; /* Oculto hasta iniciar */
+        }
+        .timer-warning { color: #e74c3c !important; background: rgba(253,232,232,0.98) !important; box-shadow: 0 0 15px rgba(231,76,60,0.2); }
+        .timer-critical { 
+            color: #fff !important; background: #e74c3c !important; 
+            box-shadow: 0 0 20px rgba(231,76,60,0.6);
+            animation: blink 0.7s infinite; 
+        }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+    </style>
+</head>
+<body>
+    <!-- Temporizador Flotante -->
+    <div id="timer">⏱️ 20:00</div>
+
+    <header>
+        <h1>⚡ Evaluación de Conocimientos</h1>
+        <p>Taller Mediciones Eléctricas — Prof. Diego Rodriguez</p>
+    </header>
+    <main class="container">
+        <!-- PANTALLA DE INICIO + REGISTRO -->
+        <div id="welcomeScreen" class="screen active">
+            <div class="card">
+                <h2>📝 Registro del Alumno</h2>
+                <p style="margin: 0.5rem 0 1.5rem; color: #666;">Completá tus datos para iniciar la evaluación.</p>
+                
+                <div id="registrationForm">
+                    <div class="form-group">
+                        <label>Nombre *</label>
+                        <input type="text" id="inpNombre" placeholder="Tu nombre">
+                    </div>
+                    <div class="form-group">
+                        <label>Apellido *</label>
+                        <input type="text" id="inpApellido" placeholder="Tu apellido">
+                    </div>
+                    <div class="form-group">
+                        <label>Curso *</label>
+                        <input type="text" id="inpCurso" placeholder="Ej: 4° A">
+                    </div>
+                    <div class="form-group">
+                        <label>DNI (Opcional)</label>
+                        <input type="text" id="inpDni" placeholder="Sin puntos">
+                    </div>
+                    <div id="formError" class="form-error">⚠️ Completá los campos obligatorios (*).</div>
+                </div>
+
+                <div id="loadingMsg" class="loading" style="display:none;">🔄 Cargando banco de preguntas...</div>
+                <button id="startBtn" class="btn" disabled onclick="validateAndStart()">Cargando preguntas...</button>
+            </div>
+        </div>
+
+        <!-- PANTALLA DE QUIZ -->
+        <div id="quizScreen" class="screen">
+            <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+            <div id="progressText" style="text-align: right; color: #7f8c8d; font-weight: 600; margin-bottom: 1rem;">Respondidas: 0 de 20</div>
+            <div id="questionsContainer"></div>
+            <button class="btn" onclick="submitQuiz()">Finalizar y Ver Nota</button>
+        </div>
+
+        <!-- PANTALLA DE RESULTADOS -->
+        <div id="resultScreen" class="screen">
+            <div class="card">
+                <h3>📊 Resultados Finales</h3>
+                <div class="score-display" id="scoreValue">0.0</div>
+                <div id="scoreBadge" class="badge"></div>
+                <p id="scoreMsg" style="margin-bottom: 2rem; font-size: 1.1rem;"></p>
+                
+                <div style="display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center;">
+                    <button class="btn btn-secondary" onclick="toggleReview()">🔍 Revisar Respuestas</button>
+                    <button class="btn" onclick="generarExamenDOCX()">📄 Descargar Examen (.docx)</button>
+                </div>
+                
+                <div id="reviewContainer" class="hidden" style="margin-top: 2rem; text-align: left;"></div>
+                <button class="btn" style="margin-top: 2rem; background: #27ae60;" onclick="location.reload()">🔄 Realizar Nuevo Test</button>
+            </div>
+        </div>
+    </main>
+    <footer>4° Año — Ciclo Superior</footer>
+
+    <script>
+        let questions = [];
+        let selectedQuestions = [];
+        let userAnswers = [];
+        const TOTAL = 20;
+        let timerInterval;
+        let timeLeft = 20 * 60; // 20 minutos
+        let student = { nombre: '', apellido: '', curso: '', dni: '', fecha: '' };
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                // Lógica de Selección de Banco (Tu control)
+                const urlParams = new URLSearchParams(window.location.search);
+                const banco = urlParams.get('banco');
+                
+                // Si la URL tiene ?banco=2, carga ese archivo. Si no, carga el default (questions.json)
+                const jsonFile = (banco === '2') ? 'questions_banco2.json' : 'questions.json';
+                
+                console.log(`🔄 Cargando desde: ${jsonFile}`);
+                
+                const res = await fetch(jsonFile);
+                if (!res.ok) throw new Error(`HTTP ${res.status}: El archivo ${jsonFile} no se encontró.`);
+                
+                const data = await res.json();
+                questions = Array.isArray(data) ? data : (data.questions || []);
+                
+                if (questions.length === 0) throw new Error('JSON vacío');
+                
+                document.getElementById('loadingMsg').style.display = 'none';
+                document.getElementById('startBtn').textContent = 'Comenzar Evaluación';
+                document.getElementById('startBtn').disabled = false;
+                document.getElementById('startBtn').style.display = 'inline-block';
+                
+                // Etiqueta visual (Opcional)
+                if(banco === '2') {
+                    document.querySelector('header p').textContent += " (Examen 2)";
+                }
+
+            } catch (err) {
+                console.error("❌ Error fatal:", err);
+                document.getElementById('loadingMsg').innerHTML = `⚠️ Error: ${err.message}. <br>Si dice "404", es que el archivo del examen no existe aún en el sistema.`;
+                document.getElementById('loadingMsg').className = 'error';
+            }
+        });
+
+        function validateAndStart() {
+            const nombre = document.getElementById('inpNombre').value.trim();
+            const apellido = document.getElementById('inpApellido').value.trim();
+            const curso = document.getElementById('inpCurso').value.trim();
+            const dni = document.getElementById('inpDni').value.trim();
+            const errorDiv = document.getElementById('formError');
+
+            if (!nombre || !apellido || !curso) {
+                errorDiv.style.display = 'block';
+                return;
+            }
+            errorDiv.style.display = 'none';
+            student = { nombre, apellido, curso, dni, fecha: new Date().toLocaleString('es-AR') };
+            
+            document.getElementById('registrationForm').style.display = 'none';
+            startQuiz();
+        }
+
+        function startQuiz() {
+            selectedQuestions = [...questions].sort(() => Math.random() - 0.5).slice(0, TOTAL);
+            userAnswers = new Array(TOTAL).fill(null);
+            document.getElementById('welcomeScreen').classList.remove('active');
+            document.getElementById('quizScreen').classList.add('active');
+            document.getElementById('timer').style.display = 'block'; // Mostrar timer
+            renderQuestions();
+            startTimer();
+        }
+
+        function renderQuestions() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            selectedQuestions.forEach((q, i) => {
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.innerHTML = `<h4>${i + 1}. ${q.question}</h4><div class="options">${q.options.map((opt, j) => `<label class="option"><input type="radio" name="q${i}" value="${j}" onchange="saveAnswer(${i}, ${j})">${opt}</label>`).join('')}</div>`;
+                container.appendChild(card);
+            });
+            updateProgress();
+        }
+
+        function saveAnswer(idx, val) { userAnswers[idx] = val; updateProgress(); }
+        function updateProgress() {
+            const answered = userAnswers.filter(a => a !== null).length;
+            document.getElementById('progressText').textContent = `Respondidas: ${answered} de ${TOTAL}`;
+            document.getElementById('progressFill').style.width = `${(answered / TOTAL) * 100}%`;
+        }
+
+        function startTimer() {
+            updateTimerDisplay();
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    alert("⏰ ¡Tiempo agotado! Se enviará automáticamente.");
+                    submitQuiz();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+            const s = (timeLeft % 60).toString().padStart(2, '0');
+            const el = document.getElementById('timer');
+            el.textContent = `⏱️ ${m}:${s}`;
+            
+            el.classList.remove('timer-warning', 'timer-critical');
+            if (timeLeft <= 120) el.classList.add('timer-critical');      // 2 min: parpadea rojo
+            else if (timeLeft <= 300) el.classList.add('timer-warning');  // 5 min: rojo fijo
+        }
+
+        function submitQuiz() {
+            clearInterval(timerInterval);
+            document.getElementById('timer').style.display = 'none'; // Ocultar al finalizar
+            
+            const unanswered = userAnswers.filter(a => a === null).length;
+            if (unanswered > 0 && !confirm(`⚠️ Te faltan ${unanswered} preguntas. ¿Finalizar igual?`)) return;
+            
+            let correct = 0;
+            selectedQuestions.forEach((q, i) => { if (userAnswers[i] === q.correct) correct++; });
+            const score = Math.round((correct / TOTAL) * 10 * 10) / 10;
+            
+            document.getElementById('quizScreen').classList.remove('active');
+            document.getElementById('resultScreen').classList.add('active');
+            document.getElementById('scoreValue').textContent = score.toFixed(1);
+            
+            const badge = document.getElementById('scoreBadge');
+            const msg = document.getElementById('scoreMsg');
+            if (score >= 9) { badge.textContent = '🏆 Excelente'; badge.style.background = '#27ae60'; msg.textContent = '¡Dominas perfectamente el contenido!'; }
+            else if (score >= 7) { badge.textContent = '👍 Muy Bien'; badge.style.background = '#2980b9'; msg.textContent = 'Buen nivel de comprensión.'; }
+            else if (score >= 6) { badge.textContent = '📚 Aprobado'; badge.style.background = '#f39c12'; msg.textContent = 'Aprobado. Revisá los conceptos donde fallaste.'; }
+            else { badge.textContent = '💪 Necesita Refuerzo'; badge.style.background = '#e74c3c'; msg.textContent = 'Es recomendable repasar los manuales.'; }
+            renderReview();
+        }
+
+        function renderReview() {
+            const container = document.getElementById('reviewContainer');
+            container.innerHTML = '<h4 style="margin-bottom:1rem; color:var(--primary);">🔍 Detalle</h4>';
+            selectedQuestions.forEach((q, i) => {
+                const isCorrect = userAnswers[i] === q.correct;
+                const userText = userAnswers[i] !== null ? q.options[userAnswers[i]] : 'Sin responder';
+                const item = document.createElement('div');
+                item.className = `review-item ${isCorrect ? 'correct' : 'incorrect'}`;
+                item.innerHTML = `<strong>${i + 1}. ${q.question}</strong><p style="margin:0.5rem 0; font-size:0.9rem; color:${isCorrect ? 'green' : 'red'}">Tu respuesta: ${userText} ${isCorrect ? '✅' : '❌'}</p>${!isCorrect ? `<p style="margin:0; font-size:0.9rem; color:#27ae60">✔ Correcta: ${q.options[q.correct]}</p>` : ''}`;
+                container.appendChild(item);
+            });
+        }
+        function toggleReview() { document.getElementById('reviewContainer').classList.toggle('hidden'); }
+
+        async function generarExamenDOCX() {
+            const { Document, Packer, Paragraph, Table, TableRow, TableCell, WidthType, AlignmentType, HeadingLevel, TextRun, BorderStyle } = docx;
+            const score = Math.round((selectedQuestions.filter((q, i) => userAnswers[i] === q.correct).length / TOTAL) * 10 * 10) / 10;
+            
+            const children = [
+                new Paragraph({ text: "EVALUACIÓN DE CONOCIMIENTOS", heading: HeadingLevel.HEADING_1, alignment: AlignmentType.CENTER, spacing: { after: 200 } }),
+                new Paragraph({ text: "Taller Mediciones Eléctricas — Prof. Diego Rodriguez", alignment: AlignmentType.CENTER, spacing: { after: 400 } }),
+                new Paragraph({ text: `Alumno: ${student.apellido}, ${student.nombre}`, spacing: { after: 100 } }),
+                new Paragraph({ text: `Curso: ${student.curso}${student.dni ? ` | DNI: ${student.dni}` : ''}`, spacing: { after: 100 } }),
+                new Paragraph({ text: `Fecha y Hora: ${student.fecha}`, spacing: { after: 100 } }),
+                new Paragraph({ text: `Puntaje Final: ${score.toFixed(1)} / 10`, bold: true, spacing: { after: 300 } }),
+                new Paragraph({ text: "DETALLE DE RESPUESTAS", heading: HeadingLevel.HEADING_2, spacing: { after: 200 } })
+            ];
+
+            const rows = [new TableRow({ children: [
+                new TableCell({ children: [new Paragraph({ text: "Pregunta", bold: true })], width: { size: 50, type: WidthType.PERCENTAGE } }),
+                new TableCell({ children: [new Paragraph({ text: "Tu Respuesta", bold: true })], width: { size: 25, type: WidthType.PERCENTAGE } }),
+                new TableCell({ children: [new Paragraph({ text: "Correcta", bold: true })], width: { size: 25, type: WidthType.PERCENTAGE } })
+            ]})];
+
+            selectedQuestions.forEach((q, i) => {
+                const isCorrect = userAnswers[i] === q.correct;
+                const userText = userAnswers[i] !== null ? q.options[userAnswers[i]] : "Sin responder";
+                rows.push(new TableRow({ children: [
+                    new TableCell({ children: [new Paragraph(`${i + 1}. ${q.question}`)] }),
+                    new TableCell({ children: [new Paragraph({ text: userText + (isCorrect ? " ✅" : " ❌"), color: isCorrect ? "27ae60" : "e74c3c" })] }),
+                    new TableCell({ children: [new Paragraph({ text: q.options[q.correct], color: "27ae60" })] })
+                ]}));
+            });
+
+            children.push(new Table({ rows, width: { size: 100, type: WidthType.PERCENTAGE } }));
+            children.push(new Paragraph({ text: "Firma del Alumno: __________________________", spacing: { before: 400 } }));
+
+            const doc = new Document({ sections: [{ children }] });
+            const blob = await Packer.toBlob(doc);
+            saveAs(blob, `Examen_${student.apellido}_${student.nombre}_${new Date().toISOString().slice(0,10)}.docx`);
+        }
+    </script>
+</body>
+</html>
