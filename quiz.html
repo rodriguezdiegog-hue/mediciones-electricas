@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Evaluación - Prof. Diego Rodriguez | </title>
+    <title>Evaluación - Prof. Diego Rodriguez | EETP 485</title>
     <!-- Librerías para generar .docx -->
     <script src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
     <script src="https://unpkg.com/file-saver@2.0.5/dist/FileSaver.min.js"></script>
@@ -35,18 +35,39 @@
         .loading { color: var(--secondary); font-weight: 600; margin: 1rem 0; } .error { color: var(--accent); font-weight: 600; margin: 1rem 0; }
         .hidden { display: none !important; }
         
-        /* Estilos del Formulario */
+        /* Formulario */
         .form-group { margin-bottom: 1rem; text-align: left; }
         .form-group label { display: block; font-weight: 600; margin-bottom: 0.4rem; color: var(--primary); }
         .form-group input { width: 100%; padding: 0.8rem; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; transition: border 0.3s; }
         .form-group input:focus { border-color: var(--secondary); outline: none; box-shadow: 0 0 0 3px rgba(41, 128, 185, 0.1); }
         .form-error { color: var(--accent); font-size: 0.9rem; margin-top: 0.5rem; display: none; }
+
+        /* Temporizador Flotante */
+        #timer {
+            position: fixed; top: 20px; right: 20px; z-index: 1000;
+            font-size: 1.4rem; font-weight: 800; font-family: monospace;
+            color: var(--secondary); background: rgba(255,255,255,0.95);
+            padding: 0.6rem 1.2rem; border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            backdrop-filter: blur(5px); transition: all 0.3s ease;
+            display: none; /* Oculto hasta iniciar */
+        }
+        .timer-warning { color: #e74c3c !important; background: rgba(253,232,232,0.98) !important; box-shadow: 0 0 15px rgba(231,76,60,0.2); }
+        .timer-critical { 
+            color: #fff !important; background: #e74c3c !important; 
+            box-shadow: 0 0 20px rgba(231,76,60,0.6);
+            animation: blink 0.7s infinite; 
+        }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
     </style>
 </head>
 <body>
+    <!-- Temporizador Flotante -->
+    <div id="timer">⏱️ 20:00</div>
+
     <header>
         <h1>⚡ Evaluación de Conocimientos</h1>
-        <p>Taller Mediciones Eléctricas — Prof. Diego Rodriguez</p>
+        <p>Taller Mediciones Eléctricas — EETP 485 — Prof. Diego Rodriguez</p>
     </header>
     <main class="container">
         <!-- PANTALLA DE INICIO + REGISTRO -->
@@ -82,11 +103,8 @@
 
         <!-- PANTALLA DE QUIZ -->
         <div id="quizScreen" class="screen">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; font-weight: 600; color: #7f8c8d;">
-                <span id="progressText">Respondidas: 0 de 20</span>
-                <span id="timer" style="font-size: 1.2rem; color: var(--secondary); font-family: monospace; background: #f8f9fa; padding: 0.3rem 0.8rem; border-radius: 6px;">⏱️ 15:00</span>
-            </div>
             <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+            <div id="progressText" style="text-align: right; color: #7f8c8d; font-weight: 600; margin-bottom: 1rem;">Respondidas: 0 de 20</div>
             <div id="questionsContainer"></div>
             <button class="btn" onclick="submitQuiz()">Finalizar y Ver Nota</button>
         </div>
@@ -117,10 +135,9 @@
         let userAnswers = [];
         const TOTAL = 20;
         let timerInterval;
-        let timeLeft = 15 * 60;
+        let timeLeft = 20 * 60; // 20 minutos
         let student = { nombre: '', apellido: '', curso: '', dni: '', fecha: '' };
 
-        // Carga inicial
         document.addEventListener('DOMContentLoaded', async () => {
             try {
                 const res = await fetch('questions.json');
@@ -162,6 +179,7 @@
             userAnswers = new Array(TOTAL).fill(null);
             document.getElementById('welcomeScreen').classList.remove('active');
             document.getElementById('quizScreen').classList.add('active');
+            document.getElementById('timer').style.display = 'block'; // Mostrar timer
             renderQuestions();
             startTimer();
         }
@@ -203,13 +221,18 @@
             const s = (timeLeft % 60).toString().padStart(2, '0');
             const el = document.getElementById('timer');
             el.textContent = `⏱️ ${m}:${s}`;
-            if (timeLeft <= 120) { el.style.color = '#e74c3c'; el.style.background = '#fde8e8'; }
+            
+            el.classList.remove('timer-warning', 'timer-critical');
+            if (timeLeft <= 120) el.classList.add('timer-critical');      // 2 min: parpadea rojo
+            else if (timeLeft <= 300) el.classList.add('timer-warning');  // 5 min: rojo fijo
         }
 
         function submitQuiz() {
+            clearInterval(timerInterval);
+            document.getElementById('timer').style.display = 'none'; // Ocultar al finalizar
+            
             const unanswered = userAnswers.filter(a => a === null).length;
             if (unanswered > 0 && !confirm(`⚠️ Te faltan ${unanswered} preguntas. ¿Finalizar igual?`)) return;
-            clearInterval(timerInterval);
             
             let correct = 0;
             selectedQuestions.forEach((q, i) => { if (userAnswers[i] === q.correct) correct++; });
@@ -242,13 +265,10 @@
         }
         function toggleReview() { document.getElementById('reviewContainer').classList.toggle('hidden'); }
 
-        // 📄 GENERACIÓN DE EXAMEN EN .DOCX
         async function generarExamenDOCX() {
             const { Document, Packer, Paragraph, Table, TableRow, TableCell, WidthType, AlignmentType, HeadingLevel, TextRun, BorderStyle } = docx;
-            
             const score = Math.round((selectedQuestions.filter((q, i) => userAnswers[i] === q.correct).length / TOTAL) * 10 * 10) / 10;
             
-            // Encabezado
             const children = [
                 new Paragraph({ text: "EVALUACIÓN DE CONOCIMIENTOS", heading: HeadingLevel.HEADING_1, alignment: AlignmentType.CENTER, spacing: { after: 200 } }),
                 new Paragraph({ text: "Taller Mediciones Eléctricas — EETP 485", alignment: AlignmentType.CENTER, spacing: { after: 400 } }),
@@ -259,14 +279,11 @@
                 new Paragraph({ text: "DETALLE DE RESPUESTAS", heading: HeadingLevel.HEADING_2, spacing: { after: 200 } })
             ];
 
-            // Tabla de preguntas
-            const rows = [
-                new TableRow({ children: [
-                    new TableCell({ children: [new Paragraph({ text: "Pregunta", bold: true })], width: { size: 50, type: WidthType.PERCENTAGE } }),
-                    new TableCell({ children: [new Paragraph({ text: "Tu Respuesta", bold: true })], width: { size: 25, type: WidthType.PERCENTAGE } }),
-                    new TableCell({ children: [new Paragraph({ text: "Correcta", bold: true })], width: { size: 25, type: WidthType.PERCENTAGE } })
-                ]})
-            ];
+            const rows = [new TableRow({ children: [
+                new TableCell({ children: [new Paragraph({ text: "Pregunta", bold: true })], width: { size: 50, type: WidthType.PERCENTAGE } }),
+                new TableCell({ children: [new Paragraph({ text: "Tu Respuesta", bold: true })], width: { size: 25, type: WidthType.PERCENTAGE } }),
+                new TableCell({ children: [new Paragraph({ text: "Correcta", bold: true })], width: { size: 25, type: WidthType.PERCENTAGE } })
+            ]})];
 
             selectedQuestions.forEach((q, i) => {
                 const isCorrect = userAnswers[i] === q.correct;
