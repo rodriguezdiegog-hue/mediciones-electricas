@@ -33,7 +33,7 @@
   {"id":32,"question":"A 50 Hz, si aumentamos los microfaradios del capacitor, la corriente:","options":["Aumentará.","Quedará igual.","Disminuirá."],"correct":0},
   {"id":33,"question":"¿Cuál es el símbolo del capacitor en los diagramas del taller?","options":["Una línea en zigzag.","Dos líneas paralelas.","Una espiral."],"correct":1},
   {"id":34,"question":"¿Cuál es el símbolo del inductor (bobina)?","options":["Una espiral o rulo.","Un círculo con una X.","Dos líneas paralelas."],"correct":0},
-  {"id":35,"question":"La reactancia inductiva depende de:","options":["La capacidad (C).","La inductancia (L) y la frecuencia (f).","Solo del voltaje."],"correct":2},
+  {"id":35,"question":"La reactancia inductiva depende de:","options":["La capacidad (C).","La inductancia (L) y la frecuencia (f).","Solo del voltaje."],"correct":1},
   {"id":36,"question":"En un gráfico de oposición vs frecuencia, la curva que baja es:","options":["La de la bobina (X_L).","La del capacitor (X_C).","La de la resistencia (R)."],"correct":1},
   {"id":37,"question":"En un gráfico de oposición vs frecuencia, la línea recta ascendente representa:","options":["La Reactancia Inductiva (X_L).","La Reactancia Capacitiva (X_C).","La Impedancia Total."],"correct":0},
   {"id":38,"question":"Un inductor de 0,5 H a 50 Hz tiene una X_L de aproximadamente:","options":["157 Ω","314 Ω.","15,9 Ω."],"correct":0},
