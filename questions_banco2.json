@@ -106,7 +106,7 @@
   {"id":105,"question":"Si reemplazamos un capacitor por uno de mayor capacidad, la reactancia:","options":["Aumenta.","Disminuye.","No cambia."],"correct":1},
   {"id":106,"question":"Una bobina física se compone de:","options":["Resistencia óhmica pura e Inductancia.","Solo inductancia.","Capacitancia y Voltaje."],"correct":0},
   {"id":107,"question":"El alambre de cobre de la bobina es responsable de:","options":["El fenómeno electromagnético.","La resistencia óhmica interna (R).","La frecuencia de red."],"correct":1},
-  {"id":108,"question":"En la Fase 2 del diagnóstico de bobinas, el cálculo Z = V / I nos da:","options":["La reactancia pura.","La Impedancia Total (combinación inseparable de R y X_L).","La potencia de la fuente."],"correct":1},
+  {"id":108,"question":"En el diagnóstico de bobinas, el cálculo Z = V / I nos da:","options":["La reactancia pura.","La Impedancia Total (combinación inseparable de R y X_L).","La potencia de la fuente."],"correct":1},
   {"id":109,"question":"El cateto opuesto del triángulo de impedancias en una bobina es:","options":["La Resistencia (R).","La Reactancia Inductiva (X_L).","La Impedancia (Z)."],"correct":1},
   {"id":110,"question":"Un inductor con R significativa requiere:","options":["Cálculo de impedancia combinada.","Ignorar la resistencia.","Solo medir con ohmímetro."],"correct":0},
   {"id":111,"question":"¿Qué ocurre si medimos resistencia con el multímetro en un circuito energizado?","options":["Se mide la resistencia correctamente.","Se puede dañar el instrumento o causar un accidente.","No pasa nada."],"correct":1},
