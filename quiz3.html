@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Evaluación - Prof. Diego Rodriguez</title>
-    <!-- Librerías para generar .docx y descargar -->
+    <title>Evaluación 3 - Prof. Diego Rodriguez</title>
     <script src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
     <script src="https://unpkg.com/file-saver@2.0.5/dist/FileSaver.min.js"></script>
     <style>
+        /* MISMOS ESTILOS QUE ANTERIOR */
         :root { --primary: #1a5276; --secondary: #2980b9; --accent: #e74c3c; --success: #27ae60; --bg: #f0f4f8; --card: #ffffff; --text: #2c3e50; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
         body { background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
@@ -34,143 +34,83 @@
         footer { text-align: center; padding: 1.5rem; color: #7f8c8d; font-size: 0.85rem; border-top: 1px solid #e0e0e0; }
         .loading { color: var(--secondary); font-weight: 600; margin: 1rem 0; } .error { color: var(--accent); font-weight: 600; margin: 1rem 0; }
         .hidden { display: none !important; }
-        
-        /* Formulario */
         .form-group { margin-bottom: 1rem; text-align: left; }
         .form-group label { display: block; font-weight: 600; margin-bottom: 0.4rem; color: var(--primary); }
         .form-group input { width: 100%; padding: 0.8rem; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; transition: border 0.3s; }
         .form-group input:focus { border-color: var(--secondary); outline: none; box-shadow: 0 0 0 3px rgba(41, 128, 185, 0.1); }
         .form-error { color: var(--accent); font-size: 0.9rem; margin-top: 0.5rem; display: none; }
-
-        /* Temporizador Flotante */
-        #timer {
-            position: fixed; top: 20px; right: 20px; z-index: 1000;
-            font-size: 1.4rem; font-weight: 800; font-family: monospace;
-            color: var(--secondary); background: rgba(255,255,255,0.95);
-            padding: 0.6rem 1.2rem; border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-            backdrop-filter: blur(5px); transition: all 0.3s ease;
-            display: none; /* Oculto hasta iniciar */
-        }
-        .timer-warning { color: #e74c3c !important; background: rgba(253,232,232,0.98) !important; box-shadow: 0 0 15px rgba(231,76,60,0.2); }
-        .timer-critical { 
-            color: #fff !important; background: #e74c3c !important; 
-            box-shadow: 0 0 20px rgba(231,76,60,0.6);
-            animation: blink 0.7s infinite; 
-        }
+        #timer { position: fixed; top: 20px; right: 20px; z-index: 1000; font-size: 1.4rem; font-weight: 800; font-family: monospace; color: var(--secondary); background: rgba(255,255,255,0.95); padding: 0.6rem 1.2rem; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); backdrop-filter: blur(5px); transition: all 0.3s ease; display: none; }
+        .timer-warning { color: #e74c3c !important; background: rgba(253,232,232,0.98) !important; }
+        .timer-critical { color: #fff !important; background: #e74c3c !important; animation: blink 0.7s infinite; }
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
     </style>
 </head>
 <body>
-    <!-- Temporizador Flotante -->
     <div id="timer">⏱️ 20:00</div>
-
-    <header>
-        <h1>⚡ Evaluación de Conocimientos</h1>
-        <p>Taller Mediciones Eléctricas — Prof. Diego Rodriguez</p>
-    </header>
+    <header><h1>⚡ Evaluación 3 (TP3/5/6)</h1><p>Taller Mediciones Eléctricas — Prof. Diego Rodriguez</p></header>
     <main class="container">
-        <!-- PANTALLA DE INICIO + REGISTRO -->
         <div id="welcomeScreen" class="screen active">
             <div class="card">
-                <h2>📝 Registro del Alumno</h2>
-                <p style="margin: 0.5rem 0 1.5rem; color: #666;">Completá tus datos para iniciar la evaluación.</p>
-                
+                <h2> Registro del Alumno</h2>
+                <p style="margin: 0.5rem 0 1.5rem; color: #666;">Completá tus datos para iniciar.</p>
                 <div id="registrationForm">
-                    <div class="form-group">
-                        <label>Nombre *</label>
-                        <input type="text" id="inpNombre" placeholder="Tu nombre">
-                    </div>
-                    <div class="form-group">
-                        <label>Apellido *</label>
-                        <input type="text" id="inpApellido" placeholder="Tu apellido">
-                    </div>
-                    <div class="form-group">
-                        <label>Curso *</label>
-                        <input type="text" id="inpCurso" placeholder="Ej: 4° A">
-                    </div>
-                    <div class="form-group">
-                        <label>DNI (Opcional)</label>
-                        <input type="text" id="inpDni" placeholder="Sin puntos">
-                    </div>
-                    <div id="formError" class="form-error">⚠️ Completá los campos obligatorios (*).</div>
+                    <div class="form-group"><label>Nombre *</label><input type="text" id="inpNombre"></div>
+                    <div class="form-group"><label>Apellido *</label><input type="text" id="inpApellido"></div>
+                    <div class="form-group"><label>Curso *</label><input type="text" id="inpCurso"></div>
+                    <div class="form-group"><label>DNI (Opcional)</label><input type="text" id="inpDni"></div>
+                    <div id="formError" class="form-error">️ Completá los campos obligatorios (*).</div>
                 </div>
-
-                <div id="loadingMsg" class="loading" style="display:none;">🔄 Cargando banco de preguntas...</div>
-                <button id="startBtn" class="btn" disabled onclick="validateAndStart()">Cargando preguntas...</button>
+                <div id="loadingMsg" class="loading" style="display:none;">🔄 Cargando banco...</div>
+                <button id="startBtn" class="btn" disabled onclick="validateAndStart()">Cargando...</button>
             </div>
         </div>
-
-        <!-- PANTALLA DE QUIZ -->
         <div id="quizScreen" class="screen">
             <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
             <div id="progressText" style="text-align: right; color: #7f8c8d; font-weight: 600; margin-bottom: 1rem;">Respondidas: 0 de 20</div>
             <div id="questionsContainer"></div>
             <button class="btn" onclick="submitQuiz()">Finalizar y Ver Nota</button>
         </div>
-
-        <!-- PANTALLA DE RESULTADOS -->
         <div id="resultScreen" class="screen">
             <div class="card">
-                <h3>📊 Resultados Finales</h3>
+                <h3> Resultados Finales</h3>
                 <div class="score-display" id="scoreValue">0.0</div>
                 <div id="scoreBadge" class="badge"></div>
                 <p id="scoreMsg" style="margin-bottom: 2rem; font-size: 1.1rem;"></p>
-                
                 <div style="display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center;">
                     <button class="btn btn-secondary" onclick="toggleReview()">🔍 Revisar Respuestas</button>
-                    <button class="btn" onclick="generarExamenDOCX()">📄 Descargar Examen (.docx)</button>
+                    <button class="btn" onclick="generarExamenDOCX()">📄 Descargar Examen (.docx) nuevamente</button>
                 </div>
-                
                 <div id="reviewContainer" class="hidden" style="margin-top: 2rem; text-align: left;"></div>
-                <button class="btn" style="margin-top: 2rem; background: #27ae60;" onclick="location.reload()">🔄 Realizar Nuevo Test</button>
+                <button class="btn" style="margin-top: 2rem; background: #27ae60;" onclick="location.reload()">🔄 Nuevo Test</button>
             </div>
         </div>
     </main>
-    <footer>4° Año — Ciclo Superior - 2026</footer>
+    <footer>4° Año — Ciclo Superior</footer>
 
     <script>
-        let questions = [];
-        let selectedQuestions = [];
-        let userAnswers = [];
-        const TOTAL = 20;
-        let timerInterval;
-        let timeLeft = 20 * 60; // 20 minutos
+        let questions = []; let selectedQuestions = []; let userAnswers = []; const TOTAL = 20;
+        let timerInterval; let timeLeft = 20 * 60;
         let student = { nombre: '', apellido: '', curso: '', dni: '', fecha: '' };
 
         document.addEventListener('DOMContentLoaded', async () => {
             try {
-                // Lógica de Selección de Banco (Tu control)
-                const urlParams = new URLSearchParams(window.location.search);
-                const banco = urlParams.get('banco');
-                
-                // Si la URL tiene ?banco=2, carga ese archivo. Si no, carga el default (questions.json)
-                // 📂 BANCO FIJO PARA ESTE EXAMEN:
-                const jsonFile = 'questions_banco3.json'; 
-                
-                console.log(`🔄 Cargando desde: ${jsonFile}`);
-                
-                const res = await fetch(jsonFile);
-                if (!res.ok) throw new Error(`HTTP ${res.status}: El archivo ${jsonFile} no se encontró.`);
-                
-                const data = await res.json();
+                const res = await fetch('questions_banco3.json?t=' + new Date().getTime());
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                let data = await res.json();
                 questions = Array.isArray(data) ? data : (data.questions || []);
                 
+                // Eliminar duplicados
+                const uniqueMap = new Map();
+                questions.forEach(q => { if (!uniqueMap.has(q.id)) uniqueMap.set(q.id, q); });
+                questions = Array.from(uniqueMap.values());
+
                 if (questions.length === 0) throw new Error('JSON vacío');
-                
                 document.getElementById('loadingMsg').style.display = 'none';
                 document.getElementById('startBtn').textContent = 'Comenzar Evaluación';
                 document.getElementById('startBtn').disabled = false;
                 document.getElementById('startBtn').style.display = 'inline-block';
-                
-                // Etiqueta visual (Opcional)
-                if(banco === '2') {
-                    document.querySelector('header p').textContent += " (Examen 2)";
-                }
-
             } catch (err) {
-                console.error("❌ Error fatal:", err);
-                document.getElementById('loadingMsg').innerHTML = `⚠️ Error: ${err.message}. <br>Si dice "404", es que el archivo del examen no existe aún en el sistema.`;
+                document.getElementById('loadingMsg').innerHTML = `⚠️ Error: ${err.message}`;
                 document.getElementById('loadingMsg').className = 'error';
             }
         });
@@ -179,26 +119,23 @@
             const nombre = document.getElementById('inpNombre').value.trim();
             const apellido = document.getElementById('inpApellido').value.trim();
             const curso = document.getElementById('inpCurso').value.trim();
-            const dni = document.getElementById('inpDni').value.trim();
-            const errorDiv = document.getElementById('formError');
-
-            if (!nombre || !apellido || !curso) {
-                errorDiv.style.display = 'block';
-                return;
-            }
-            errorDiv.style.display = 'none';
-            student = { nombre, apellido, curso, dni, fecha: new Date().toLocaleString('es-AR') };
-            
+            if (!nombre || !apellido || !curso) { document.getElementById('formError').style.display = 'block'; return; }
+            document.getElementById('formError').style.display = 'none';
+            student = { nombre, apellido, curso, dni: document.getElementById('inpDni').value.trim(), fecha: new Date().toLocaleString('es-AR') };
             document.getElementById('registrationForm').style.display = 'none';
             startQuiz();
         }
 
         function startQuiz() {
-            selectedQuestions = [...questions].sort(() => Math.random() - 0.5).slice(0, TOTAL);
+            for (let i = questions.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [questions[i], questions[j]] = [questions[j], questions[i]];
+            }
+            selectedQuestions = questions.slice(0, TOTAL);
             userAnswers = new Array(TOTAL).fill(null);
             document.getElementById('welcomeScreen').classList.remove('active');
             document.getElementById('quizScreen').classList.add('active');
-            document.getElementById('timer').style.display = 'block'; // Mostrar timer
+            document.getElementById('timer').style.display = 'block';
             renderQuestions();
             startTimer();
         }
@@ -227,11 +164,7 @@
             timerInterval = setInterval(() => {
                 timeLeft--;
                 updateTimerDisplay();
-                if (timeLeft <= 0) {
-                    clearInterval(timerInterval);
-                    alert("⏰ ¡Tiempo agotado! Se enviará automáticamente.");
-                    submitQuiz();
-                }
+                if (timeLeft <= 0) { clearInterval(timerInterval); alert("⏰ ¡Tiempo agotado!"); submitQuiz(); }
             }, 1000);
         }
 
@@ -240,18 +173,16 @@
             const s = (timeLeft % 60).toString().padStart(2, '0');
             const el = document.getElementById('timer');
             el.textContent = `⏱️ ${m}:${s}`;
-            
             el.classList.remove('timer-warning', 'timer-critical');
-            if (timeLeft <= 120) el.classList.add('timer-critical');      // 2 min: parpadea rojo
-            else if (timeLeft <= 300) el.classList.add('timer-warning');  // 5 min: rojo fijo
+            if (timeLeft <= 120) el.classList.add('timer-critical');
+            else if (timeLeft <= 300) el.classList.add('timer-warning');
         }
 
         function submitQuiz() {
             clearInterval(timerInterval);
-            document.getElementById('timer').style.display = 'none'; // Ocultar al finalizar
-            
+            document.getElementById('timer').style.display = 'none';
             const unanswered = userAnswers.filter(a => a === null).length;
-            if (unanswered > 0 && !confirm(`⚠️ Te faltan ${unanswered} preguntas. ¿Finalizar igual?`)) return;
+            if (unanswered > 0 && !confirm(`️ Te faltan ${unanswered} preguntas. ¿Finalizar igual?`)) return;
             
             let correct = 0;
             selectedQuestions.forEach((q, i) => { if (userAnswers[i] === q.correct) correct++; });
@@ -263,11 +194,18 @@
             
             const badge = document.getElementById('scoreBadge');
             const msg = document.getElementById('scoreMsg');
-            if (score >= 9) { badge.textContent = '🏆 Excelente'; badge.style.background = '#27ae60'; msg.textContent = '¡Dominas perfectamente el contenido!'; }
+            if (score >= 9) { badge.textContent = ' Excelente'; badge.style.background = '#27ae60'; msg.textContent = '¡Dominas perfectamente el contenido!'; }
             else if (score >= 7) { badge.textContent = '👍 Muy Bien'; badge.style.background = '#2980b9'; msg.textContent = 'Buen nivel de comprensión.'; }
             else if (score >= 6) { badge.textContent = '📚 Aprobado'; badge.style.background = '#f39c12'; msg.textContent = 'Aprobado. Revisá los conceptos donde fallaste.'; }
             else { badge.textContent = '💪 Necesita Refuerzo'; badge.style.background = '#e74c3c'; msg.textContent = 'Es recomendable repasar los manuales.'; }
+            
             renderReview();
+            
+            // 🚀 DESCARGA AUTOMÁTICA DEL EXAMEN
+            setTimeout(() => {
+                alert(" Tu examen se está descargando automáticamente.");
+                generarExamenDOCX();
+            }, 1000);
         }
 
         function renderReview() {
@@ -285,11 +223,11 @@
         function toggleReview() { document.getElementById('reviewContainer').classList.toggle('hidden'); }
 
         async function generarExamenDOCX() {
-            const { Document, Packer, Paragraph, Table, TableRow, TableCell, WidthType, AlignmentType, HeadingLevel, TextRun, BorderStyle } = docx;
+            const { Document, Packer, Paragraph, Table, TableRow, TableCell, WidthType, AlignmentType, HeadingLevel } = docx;
             const score = Math.round((selectedQuestions.filter((q, i) => userAnswers[i] === q.correct).length / TOTAL) * 10 * 10) / 10;
             
             const children = [
-                new Paragraph({ text: "EVALUACIÓN DE CONOCIMIENTOS", heading: HeadingLevel.HEADING_1, alignment: AlignmentType.CENTER, spacing: { after: 200 } }),
+                new Paragraph({ text: "EVALUACIÓN DE CONOCIMIENTOS (TP3/5/6)", heading: HeadingLevel.HEADING_1, alignment: AlignmentType.CENTER, spacing: { after: 200 } }),
                 new Paragraph({ text: "Taller Mediciones Eléctricas — Prof. Diego Rodriguez", alignment: AlignmentType.CENTER, spacing: { after: 400 } }),
                 new Paragraph({ text: `Alumno: ${student.apellido}, ${student.nombre}`, spacing: { after: 100 } }),
                 new Paragraph({ text: `Curso: ${student.curso}${student.dni ? ` | DNI: ${student.dni}` : ''}`, spacing: { after: 100 } }),
@@ -319,7 +257,7 @@
 
             const doc = new Document({ sections: [{ children }] });
             const blob = await Packer.toBlob(doc);
-            saveAs(blob, `Examen_${student.apellido}_${student.nombre}_${new Date().toISOString().slice(0,10)}.docx`);
+            saveAs(blob, `Examen3_${student.apellido}_${student.nombre}_${new Date().toISOString().slice(0,10)}.docx`);
         }
     </script>
 </body>
